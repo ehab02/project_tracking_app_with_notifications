@@ -90,7 +90,7 @@ function CompleteApp() {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(formData ),
           });
 
           const data = await response.json();
@@ -113,7 +113,7 @@ function CompleteApp() {
                   headers: {
                     'Authorization': `Bearer ${data.data.token}`
                   }
-                });
+                } );
                 
                 if (projectResponse.ok) {
                   const projectData = await projectResponse.json();
@@ -241,180 +241,182 @@ function CompleteApp() {
     };
   }, []); // Empty dependency array means this will only be created once
 
-  const RegisterPageWithNavigation = () => {
-    const [formData, setFormData] = useState({
-      email: '',
-      username: '',
-      userType: '', // No default selection
-      password: ''
-    });
-    const [showPassword, setShowPassword] = useState(false);
-    const [emailError, setEmailError] = useState('');
+  const RegisterPageWithNavigation = useMemo(() => {
+    return function RegisterPage() {
+      const [formData, setFormData] = useState({
+        email: '',
+        username: '',
+        userType: '', // No default selection
+        password: ''
+      });
+      const [showPassword, setShowPassword] = useState(false);
+      const [emailError, setEmailError] = useState('');
 
-    const handleInputChange = (e) => {
-      const { name, value } = e.target;
-      setFormData(prevState => ({
-        ...prevState,
-        [name]: value
-      }));
+      const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+          ...prevState,
+          [name]: value
+        }));
 
-      if (name === 'email') {
-        setEmailError('');
-      }
-    };
+        if (name === 'email') {
+          setEmailError('');
+        }
+      };
 
-    const validateEmail = (email) => {
-      return email.endsWith('@gmail.com');
-    };
+      const validateEmail = (email) => {
+        return email.endsWith('@gmail.com');
+      };
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      
-      if (!validateEmail(formData.email)) {
-        setEmailError('Email must end with @gmail.com');
-        return;
-      }
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!validateEmail(formData.email)) {
+          setEmailError('Email must end with @gmail.com');
+          return;
+        }
 
-      try {
-        const response = await fetch('http://localhost:5000/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-        });
+        try {
+          const response = await fetch('http://localhost:5000/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData ),
+          });
 
-        const data = await response.json();
+          const data = await response.json();
 
-        if (response.ok) {
-          showNotification('success', data.message || 'Account created successfully!');
-          setCurrentPage('login'); 
-        } else {
-          showNotification('error', data.error || data.message || 'Registration failed!');
+          if (response.ok) {
+            showNotification('success', data.message || 'Account created successfully!');
+            setCurrentPage('login'); 
+          } else {
+            showNotification('error', data.error || data.message || 'Registration failed!');
+            // Keep form data intact on error
+          }
+        } catch (error) {
+          console.error('Registration error:', error);
+          showNotification('error', 'Network error or server is unreachable.');
           // Keep form data intact on error
         }
-      } catch (error) {
-        console.error('Registration error:', error);
-        showNotification('error', 'Network error or server is unreachable.');
-        // Keep form data intact on error
-      }
-    };
+      };
 
-    const handleLoginClick = () => {
-      setCurrentPage('login');
-    };
+      const handleLoginClick = () => {
+        setCurrentPage('login');
+      };
 
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl space-y-8">
-          <div className="text-center">
-            <h1 className="text-5xl font-bold text-gray-900 mb-8">
-              Register
-            </h1>
-          </div>
-          
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Email Input */}
-            <div className="min-h-[80px]">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="appearance-none relative block w-full px-4 py-4 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:z-10 text-base bg-gray-50 transition-all duration-200"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleInputChange}
-              />
-              {emailError && <p className="text-red-600 text-sm mt-1">{emailError}</p>}
-            </div>
-            
-            {/* Username Input */}
-            <div>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className="appearance-none relative block w-full px-4 py-4 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:z-10 text-base bg-gray-50 transition-all duration-200"
-                placeholder="Username"
-                value={formData.username}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            {/* Password Input */}
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                required
-                className="appearance-none relative block w-full px-4 py-4 pr-12 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:z-10 text-base bg-gray-50 transition-all duration-200"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleInputChange}
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center bg-transparent border-none outline-none shadow-none hover:shadow-none"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
-              </button>
-            </div>
-
-            {/* User Type Dropdown */}
-            <div>
-              <select
-                id="userType"
-                name="userType"
-                required
-                className="appearance-none relative block w-full px-4 py-4 border border-gray-200 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:z-10 text-base bg-gray-50 transition-all duration-200"
-                value={formData.userType}
-                onChange={handleInputChange}
-              >
-                <option value="" disabled>Register as</option>
-                <option value="Student">Student</option>
-                <option value="Supervisor">Supervisor</option>
-              </select>
-            </div>
-
-            {/* Register Button */}
-            <div>
-              <button
-                type="submit"
-                className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
-              >
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl space-y-8">
+            <div className="text-center">
+              <h1 className="text-5xl font-bold text-gray-900 mb-8">
                 Register
-              </button>
+              </h1>
             </div>
-          </form>
+            
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              {/* Email Input */}
+              <div className="min-h-[80px]">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  className="appearance-none relative block w-full px-4 py-4 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:z-10 text-base bg-gray-50 transition-all duration-200"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                />
+                {emailError && <p className="text-red-600 text-sm mt-1">{emailError}</p>}
+              </div>
+              
+              {/* Username Input */}
+              <div>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  className="appearance-none relative block w-full px-4 py-4 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:z-10 text-base bg-gray-50 transition-all duration-200"
+                  placeholder="Username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              {/* Password Input */}
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className="appearance-none relative block w-full px-4 py-4 pr-12 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:z-10 text-base bg-gray-50 transition-all duration-200"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center bg-transparent border-none outline-none shadow-none hover:shadow-none"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
 
-          <div className="text-center">
-            <p className="text-gray-600 text-base">
-              Already have an account?{' '}
-              <button
-                onClick={handleLoginClick}
-                className="font-medium text-blue-600 hover:text-blue-500 transition duration-150 ease-in-out underline-offset-4 hover:underline bg-transparent border-none outline-none shadow-none hover:shadow-none"
-              >
-                Login
-              </button>
-            </p>
+              {/* User Type Dropdown */}
+              <div>
+                <select
+                  id="userType"
+                  name="userType"
+                  required
+                  className="appearance-none relative block w-full px-4 py-4 border border-gray-200 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:z-10 text-base bg-gray-50 transition-all duration-200"
+                  value={formData.userType}
+                  onChange={handleInputChange}
+                >
+                  <option value="" disabled>Register as</option>
+                  <option value="Student">Student</option>
+                  <option value="Supervisor">Supervisor</option>
+                </select>
+              </div>
+
+              {/* Register Button */}
+              <div>
+                <button
+                  type="submit"
+                  className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Register
+                </button>
+              </div>
+            </form>
+
+            <div className="text-center">
+              <p className="text-gray-600 text-base">
+                Already have an account?{' '}
+                <button
+                  onClick={handleLoginClick}
+                  className="font-medium text-blue-600 hover:text-blue-500 transition duration-150 ease-in-out underline-offset-4 hover:underline bg-transparent border-none outline-none shadow-none hover:shadow-none"
+                >
+                  Login
+                </button>
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-    );
-  };
+      );
+    };
+  }, []); // Empty dependency array means this will only be created once
 
   const handleLogout = () => {
     localStorage.removeItem('user');
